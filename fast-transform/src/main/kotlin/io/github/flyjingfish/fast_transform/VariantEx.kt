@@ -8,6 +8,10 @@ import io.github.flyjingfish.fast_transform.tasks.DefaultTransformTask
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.configurationcache.extensions.capitalized
 
+/**
+ * @param taskProvider 注册的任务的 TaskProvider
+ * @param fastDex 是否是加速打包模式
+ */
 fun Variant.toTransformAll(taskProvider: TaskProvider<out DefaultTransformTask>,fastDex:Boolean = true){
     artifacts
         .forScope(ScopedArtifacts.Scope.ALL)

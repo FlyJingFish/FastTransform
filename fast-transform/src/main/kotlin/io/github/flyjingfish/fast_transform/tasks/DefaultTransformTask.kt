@@ -52,14 +52,23 @@ abstract class DefaultTransformTask: DefaultTask() {
 
     private var jarOutput: JarOutputStream ?= null
 
+    /**
+     * 是否是只有一个jar包
+     */
     fun singleClassesJar():Boolean{
         return is1ClassesJar
     }
 
+    /**
+     * 获取到所有输入的的jar包文件
+     */
     fun allJars():List<File>{
         return allJarFiles
     }
 
+    /**
+     * 获取到所有的输入的class文件的文件夹
+     */
     fun allDirectories():List<File>{
         return allDirectoryFiles
     }
@@ -106,8 +115,11 @@ abstract class DefaultTransformTask: DefaultTask() {
         jarEntryCaches.clear()
     }
 
+    /**
+     * 不要重写此方法
+     */
     @TaskAction
-    fun taskAction() {
+    fun hideTaskAction() {
         readyAll()
         startTask()
         writeJar()
@@ -115,7 +127,14 @@ abstract class DefaultTransformTask: DefaultTask() {
         jarOutput?.close()
     }
 
+    /**
+     * 此处相当于原来的 @TaskAction 的方法，是任务开始的地方，请不要重新 hideTaskAction()
+     */
     abstract fun startTask()
+
+    /**
+     * 可以在此做一些善后工作
+     */
     abstract fun endTask()
 
     private fun writeJar() = runBlocking{
@@ -174,6 +193,10 @@ abstract class DefaultTransformTask: DefaultTask() {
         return entries
     }
     private val jarEntryCaches = ConcurrentHashMap<String,MutableList<EntryCache>>()
+
+    /**
+     * 写入到jar的操作，File是原始 jar 包或原始class的文件夹，也可以自定义，一个File对应一个输出的jar包
+     */
     fun File.saveJarEntry(jarEntryName: String,inputStream: InputStream){
         if (isFastDex){
             saveJarEntry(jarEntryName, inputStream.readAllBytes())
@@ -182,6 +205,9 @@ abstract class DefaultTransformTask: DefaultTask() {
         }
     }
 
+    /**
+     * 写入到jar的操作，File是原始 jar 包或原始class的文件夹，也可以自定义，一个File对应一个输出的jar包
+     */
     fun File.saveJarEntry(jarEntryName: String,byteArray: ByteArray){
         if (isFastDex){
             val jarFileName = absolutePath.computeMD5()
