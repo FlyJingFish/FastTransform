@@ -1,0 +1,5 @@
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(JavaVersion.VERSION_11.toString()))
+    }
+}
