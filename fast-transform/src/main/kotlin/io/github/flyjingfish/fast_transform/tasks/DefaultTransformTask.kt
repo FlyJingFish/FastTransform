@@ -112,9 +112,11 @@ abstract class DefaultTransformTask: DefaultTask() {
         readyAll()
         scan()
         writeJar()
+        endTask()
     }
 
     abstract fun scan()
+    abstract fun endTask()
 
     private fun writeJar() = runBlocking{
         if (isFastDex){
