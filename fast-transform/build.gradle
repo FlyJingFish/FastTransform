@@ -1,0 +1,17 @@
+plugins {
+    id 'java-library'
+    id 'org.jetbrains.kotlin.jvm'
+}
+javadoc {
+    title = "Fast Transform ${version} API"
+    options.bottom = 'FastTransform'
+}
+apply from: "$rootDir/gradle/java_base.gradle"
+apply from: "$rootDir/gradle/java_publish.gradle"
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    compileOnly libs.gradle
+    implementation libs.kotlinx.coroutines
+}
