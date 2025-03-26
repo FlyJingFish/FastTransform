@@ -102,7 +102,6 @@ abstract class DefaultTransformTask: DefaultTask() {
         if (!isFastDex){
             jarOutput = JarOutputStream(BufferedOutputStream(FileOutputStream(outputFile.get().asFile)))
         }
-        jarOutput?.close()
 
         jarEntryCaches.clear()
     }
@@ -110,12 +109,13 @@ abstract class DefaultTransformTask: DefaultTask() {
     @TaskAction
     fun taskAction() {
         readyAll()
-        scan()
+        startTask()
         writeJar()
         endTask()
+        jarOutput?.close()
     }
 
-    abstract fun scan()
+    abstract fun startTask()
     abstract fun endTask()
 
     private fun writeJar() = runBlocking{
