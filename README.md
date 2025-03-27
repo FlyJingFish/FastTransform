@@ -40,7 +40,7 @@
 ```gradle
 
 dependencies {
-    implementation 'io.github.FlyJingFish.FastTransform:fast-transform:1.0.0'
+    implementation 'io.github.FlyJingFish.FastTransform:fast-transform:1.0.1'
 }
 ```
 
