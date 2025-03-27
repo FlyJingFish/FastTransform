@@ -18,9 +18,9 @@ fun Variant.toTransformAll(taskProvider: TaskProvider<out DefaultTransformTask>,
         .use(taskProvider)
         .toTransform(
             ScopedArtifact.CLASSES,
-            DefaultTransformTask::allJars,
-            DefaultTransformTask::allDirectories,
-            if (fastDex) DefaultTransformTask::outputDir else DefaultTransformTask::outputFile
+            DefaultTransformTask::hideAllJars,
+            DefaultTransformTask::hideAllDirectories,
+            if (fastDex) DefaultTransformTask::hideOutputDir else DefaultTransformTask::hideOutputFile
         )
     taskProvider.configure {
         val outDir = it.project.layout.buildDirectory.file("intermediates/classes/${taskProvider.name}/All/")
@@ -43,7 +43,7 @@ fun Variant.toTransformAll(taskProvider: TaskProvider<out DefaultTransformTask>,
             }
         }
         it.isFastDex = fastDex
-        it.outputFile.set(outFile)
-        it.outputDir.set(outDir)
+        it.hideOutputFile.set(outFile)
+        it.hideOutputDir.set(outDir)
     }
 }

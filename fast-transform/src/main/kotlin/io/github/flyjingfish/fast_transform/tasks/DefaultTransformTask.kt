@@ -33,16 +33,16 @@ abstract class DefaultTransformTask: DefaultTask() {
     abstract var isFastDex :Boolean
 
     @get:InputFiles
-    abstract val allJars: ListProperty<RegularFile>
+    abstract val hideAllJars: ListProperty<RegularFile>
 
     @get:InputFiles
-    abstract val allDirectories: ListProperty<Directory>
+    abstract val hideAllDirectories: ListProperty<Directory>
 
     @get:OutputDirectory
-    abstract val outputDir: RegularFileProperty
+    abstract val hideOutputDir: RegularFileProperty
 
     @get:OutputFile
-    abstract val outputFile: RegularFileProperty
+    abstract val hideOutputFile: RegularFileProperty
 
     private val allJarFiles = mutableListOf<File>()
 
@@ -76,7 +76,7 @@ abstract class DefaultTransformTask: DefaultTask() {
     private fun readyAll(){
         val allJarFilePaths = mutableSetOf<String>()
         val allDirectoryFilePaths = mutableSetOf<String>()
-        allDirectories.get().forEach { directory ->
+        hideAllDirectories.get().forEach { directory ->
             if (directory.asFile.isDirectory){
                 val jars = directory.asFile.walk().filter { it.name.endsWith(".jar") }.map { it.absolutePath }.toList()
                 if (jars.isNotEmpty()){
@@ -84,10 +84,14 @@ abstract class DefaultTransformTask: DefaultTask() {
                 }else{
                     allDirectoryFilePaths.add(directory.asFile.absolutePath)
                 }
+            }else if (directory.asFile.absolutePath.endsWith(".jar")){
+                allJarFilePaths.add(directory.asFile.absolutePath)
+            }else{
+                allDirectoryFilePaths.add(directory.asFile.absolutePath)
             }
         }
 
-        allJars.get().forEach { jarFile ->
+        hideAllJars.get().forEach { jarFile ->
             if (jarFile.asFile.isFile){
                 allJarFilePaths.add(jarFile.asFile.absolutePath)
             }else{
@@ -109,7 +113,7 @@ abstract class DefaultTransformTask: DefaultTask() {
         is1ClassesJar = allDirectoryFiles.isEmpty() && allJarFiles.size == 1
 
         if (!isFastDex){
-            jarOutput = JarOutputStream(BufferedOutputStream(FileOutputStream(outputFile.get().asFile)))
+            jarOutput = JarOutputStream(BufferedOutputStream(FileOutputStream(hideOutputFile.get().asFile)))
         }
 
         jarEntryCaches.clear()
@@ -142,15 +146,9 @@ abstract class DefaultTransformTask: DefaultTask() {
             val fastDexJobs = mutableListOf<Deferred<Unit>>()
             val jarOutputs = mutableListOf<JarOutputStream>()
             jarEntryCaches.forEach { (jarFileName, caches) ->
-                val jarFile = File(outputDir.get().asFile.absolutePath, "$jarFileName.jar")
+                val jarFile = File(hideOutputDir.get().asFile.absolutePath, "$jarFileName.jar")
                 val existingEntries = readExistingJarEntries(jarFile)
-                var jarChanged = false
-                for (cache in caches) {
-                    if (cache.isChange(existingEntries)){
-                        jarChanged = true
-                        break
-                    }
-                }
+                val jarChanged = caches.any { it.isChange(existingEntries) }
                 if (jarChanged){
                     val jarOutput = JarOutputStream(BufferedOutputStream(FileOutputStream(jarFile)))
                     jarOutputs.add(jarOutput)
@@ -196,6 +194,9 @@ abstract class DefaultTransformTask: DefaultTask() {
 
     /**
      * 写入到jar的操作，File是原始 jar 包或原始class的文件夹，也可以自定义，一个File对应一个输出的jar包
+     *
+     * 如果 [isFastDex] = true 此方法只是暂存，最后统一写入jar，[isFastDex] = false 则直接写入jar
+     *
      */
     fun File.saveJarEntry(jarEntryName: String,inputStream: InputStream){
         if (isFastDex){
@@ -207,6 +208,8 @@ abstract class DefaultTransformTask: DefaultTask() {
 
     /**
      * 写入到jar的操作，File是原始 jar 包或原始class的文件夹，也可以自定义，一个File对应一个输出的jar包
+     *
+     * 如果 [isFastDex] = true 此方法只是暂存，最后统一写入jar，[isFastDex] = false 则直接写入jar
      */
     fun File.saveJarEntry(jarEntryName: String,byteArray: ByteArray){
         if (isFastDex){

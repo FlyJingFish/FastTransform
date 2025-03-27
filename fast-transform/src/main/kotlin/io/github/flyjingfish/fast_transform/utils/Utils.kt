@@ -29,7 +29,7 @@ fun bytesToHex(bytes: ByteArray): String {
     return hexString.toString()
 }
 
-fun EntryCache.isChange(existingEntries: Map<String, ByteArray?>):Boolean {
+internal fun EntryCache.isChange(existingEntries: Map<String, ByteArray?>):Boolean {
     val safeEntryName = jarEntryName.removePrefix("/")
     val newData = byteArray
     // 如果 JAR 中已存在相同条目，并且内容相同，则跳过写入
