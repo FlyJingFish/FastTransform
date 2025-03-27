@@ -25,7 +25,7 @@
 
 # 简述
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 对于使用 AGP8 的 toTransform 的api的各位小伙伴来说都应该接入本框架，或遵循本框架的设计，这将使打包速度显著加快
+对于使用 AGP8 的 toTransform 的api的各位小伙伴来说都应该接入本框架，或遵循本框架的设计，这将使打包速度显著加快
 
 ### 版本限制
 
@@ -35,7 +35,7 @@
 
 **在开始之前可以给项目一个Star吗？非常感谢，你的支持是我唯一的动力。欢迎Star和Issues!**
 
-### 1、在 你的插件库的类库中引入插件
+### 1、在 你的插件库的类库中引入
 
 ```gradle
 
@@ -106,7 +106,6 @@ abstract class MyClassesTask : DefaultTransformTask() {
             }
             val jarFile = JarFile(file)
             val enumeration = jarFile.entries()
-            val wovenCodeJarJobs = mutableListOf<Deferred<Unit>>()
             while (enumeration.hasMoreElements()) {
                 val jarEntry = enumeration.nextElement()
                 val entryName = jarEntry.name
