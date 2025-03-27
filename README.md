@@ -1,10 +1,4 @@
 <p align="center">
-  <strong>
-    🔥🔥🔥这是一个万能的注册代码的框架插件
-  </strong>
-</p>
-
-<p align="center">
   <a href="https://central.sonatype.com/search?q=io.github.flyjingfish.FastTransform"><img
     src="https://img.shields.io/maven-central/v/io.github.FlyJingFish.FastTransform/fast-transform"
     alt="Build"
@@ -61,9 +55,86 @@ class MyPlugin : Plugin<Project> {
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
         androidComponents.onVariants { variant ->
             val task = project.tasks.register("${variant.name}XXX", MyClassesTask::class.java)
-            variant.toTransformAll(task)
+
+            /*
+             variant.artifacts
+                .forScope(ScopedArtifacts.Scope.ALL)
+                .use(taskProvider)
+                .toTransform(
+                    ScopedArtifact.CLASSES,
+                    MyTask::allJars,
+                    MyTask::allDirectories,
+                    MyTask::outputFile
+                ) 
+             */
+            variant.toTransformAll(task) //等价于上边的写法
+            // variant.toTransformAll(task,false) 第二个参数传入 false 就代表使用原本未加速的逻辑 
         }
     }
+}
+
+//继承 DefaultTransformTask
+abstract class MyClassesTask : DefaultTransformTask() {
+    
+    // 相当于以前被 @TaskAction 注解的方法
+    override fun startTask() {
+        allDirectories().forEach { directory ->
+            directory.walk().forEach { file ->
+                if (file.isFile) {
+                    val relativePath = file.getRelativePath(directory)
+                    val jarEntryName: String = relativePath.toClassPath()
+
+                    FileInputStream(file).use { inputs ->
+                        val cr = ClassReader(inputs)
+                        val cw = ClassWriter(cr,0)
+                        cr.accept(
+                            MyClassVisitor(cw),
+                            ClassReader.EXPAND_FRAMES
+                        )
+                        cw.toByteArray().inputStream().use {
+                            //写入jar
+                            jarFile.saveJarEntry(jarEntryName,it)
+                        }
+                    }
+                }
+            }
+        }
+
+        allJars().forEach { file ->
+            if (file.absolutePath in ignoreJar){
+                return@forEach
+            }
+            val jarFile = JarFile(file)
+            val enumeration = jarFile.entries()
+            val wovenCodeJarJobs = mutableListOf<Deferred<Unit>>()
+            while (enumeration.hasMoreElements()) {
+                val jarEntry = enumeration.nextElement()
+                val entryName = jarEntry.name
+                if (jarEntry.isDirectory || entryName.isEmpty() || entryName.startsWith("META-INF/") || "module-info.class" == entryName || !entryName.endsWith(".class")) {
+                    continue
+                }
+                jarFile.getInputStream(jarEntry).use { inputs ->
+                    val cr = ClassReader(inputs)
+                    val cw = ClassWriter(cr,0)
+                    cr.accept(
+                        MyClassVisitor(cw),
+                        ClassReader.EXPAND_FRAMES
+                    )
+                    cw.toByteArray().inputStream().use {
+                        //写入jar
+                        jarFile.saveJarEntry(jarEntryName,it)
+                    }
+                }
+            }
+
+            jarFile.close()
+        }
+    }
+
+    override fun endTask() {
+        //在此写一些结束性工作
+    }
+
 }
 
 ```
