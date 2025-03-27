@@ -93,7 +93,7 @@ abstract class MyClassesTask : DefaultTransformTask() {
                         )
                         cw.toByteArray().inputStream().use {
                             //写入jar
-                            jarFile.saveJarEntry(jarEntryName,it)
+                            directory.saveJarEntry(jarEntryName,it)
                         }
                     }
                 }
@@ -122,7 +122,7 @@ abstract class MyClassesTask : DefaultTransformTask() {
                     )
                     cw.toByteArray().inputStream().use {
                         //写入jar
-                        jarFile.saveJarEntry(jarEntryName,it)
+                        file.saveJarEntry(jarEntryName,it)
                     }
                 }
             }
