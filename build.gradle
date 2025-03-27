@@ -75,7 +75,6 @@ task aaBumpVersion() {
         versionProps.store(versionPropsFile.newWriter(), null)
 
         updateREADME("README.md",oldVersionName,newVersionName)
-        updateREADME("README-en.md",oldVersionName,newVersionName)
 
         File gradleFile = new File("gradle.properties")
         String gradleText = gradleFile.text
