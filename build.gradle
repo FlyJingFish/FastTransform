@@ -91,9 +91,7 @@ task aaBumpVersion() {
 def updateREADME(readme,oldVersionName,newVersionName) {
     File configFile = new File(readme)
     String exportText = configFile.text
-    String text = exportText.replace("io.github.FlyJingFish.EasyRegister:plugin:"+oldVersionName,"io.github.FlyJingFish.EasyRegister:plugin:"+newVersionName)
-    text = text.replace("id \"io.github.FlyJingFish.EasyRegister\" version \""+oldVersionName+"\"","id \"io.github.FlyJingFish.EasyRegister\" version \""+newVersionName+"\"")
-    text = text.replace("id(\"io.github.FlyJingFish.EasyRegister\") version \""+oldVersionName+"\"","id(\"io.github.FlyJingFish.EasyRegister\") version \""+newVersionName+"\"")
+    String text = exportText.replace("io.github.FlyJingFish.FastTransform:fast-transform:"+oldVersionName,"io.github.FlyJingFish.FastTransform:fast-transform:"+newVersionName)
     configFile.write(text)
 }
 

@@ -1,5 +1,6 @@
 package io.github.flyjingfish.fast_transform.tasks
 
+import com.android.build.api.variant.Variant
 import io.github.flyjingfish.fast_transform.beans.EntryCache
 import io.github.flyjingfish.fast_transform.utils.computeMD5
 import io.github.flyjingfish.fast_transform.utils.isChange
@@ -27,8 +28,12 @@ import java.io.InputStream
 import java.util.concurrent.ConcurrentHashMap
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
+import io.github.flyjingfish.fast_transform.toTransformAll
 
 abstract class DefaultTransformTask: DefaultTask() {
+    /**
+     * 当你调用 [toTransformAll] 传入的第二个参数
+     */
     @get:Input
     abstract var isFastDex :Boolean
 
