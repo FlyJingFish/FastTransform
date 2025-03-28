@@ -78,6 +78,12 @@ abstract class MyClassesTask : DefaultTransformTask() {
     
     // 相当于以前被 @TaskAction 注解的方法
     override fun startTask() {
+        /**
+         * singleClassesJar() 是否只有一个jar包，返回true代表之前有一个使用 toTransform 的插件，而且他没有使用本插件或没有遵循本设计
+         */
+        /**
+         * isFastDex 是调用 toTransformAll 传入的第二个参数
+         */
         allDirectories().forEach { directory ->
             directory.walk().forEach { file ->
                 if (file.isFile) {
