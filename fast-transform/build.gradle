@@ -1,6 +1,8 @@
 plugins {
-    id 'java-library'
+    id 'groovy'
+    id 'maven-publish'
     id 'org.jetbrains.kotlin.jvm'
+    id 'com.gradle.plugin-publish' version '1.2.1'
 }
 javadoc {
     title = "Fast Transform ${version} API"
@@ -14,4 +16,33 @@ dependencies {
     implementation localGroovy()
     compileOnly libs.gradle
     implementation libs.kotlinx.coroutines
+}
+
+// 发布到gradlePluginPortal
+gradlePlugin {
+    website = PROJ_WEBSITEURL
+    vcsUrl = PROJ_VCSURL
+    plugins {
+        FastTransform {
+            // 插件id
+            id = PROJ_GROUP
+            // 插件全路径
+            implementationClass = "io.github.flyjingfish.fast_transform.FastDexPlugin"
+            // 插件名称
+            displayName = 'FastTransform Plugin'
+            //描述
+            description = PROJ_DESCRIPTION
+            //标签
+            tags.addAll('FastTransform', 'FlyJingFish', 'android', 'aop')
+        }
+    }
+}
+
+publishing {
+    publications {
+        pluginMaven(MavenPublication) {
+            // 和maven仓库artifactId保持一致
+            artifactId = PROJ_NAME
+        }
+    }
 }
