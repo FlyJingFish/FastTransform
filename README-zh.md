@@ -43,7 +43,7 @@
 ```gradle
 
 dependencies {
-    implementation 'io.github.FlyJingFish.FastTransform:fast-transform:1.0.2'
+    implementation 'io.github.FlyJingFish.FastTransform:fast-transform:1.0.3'
 }
 ```
 
@@ -159,7 +159,7 @@ abstract class MyClassesTask : DefaultTransformTask() {
   
   plugins {
       //必须项 👇 注意 apply 设置必须为 true 
-      id "io.github.FlyJingFish.FastTransform" version "1.0.2" apply true
+      id "io.github.FlyJingFish.FastTransform" version "1.0.3" apply true
   }
   ```
 
@@ -169,7 +169,7 @@ abstract class MyClassesTask : DefaultTransformTask() {
     buildscript {
         dependencies {
             //必须项 👇
-            classpath 'io.github.FlyJingFish.FastTransform:fast-transform:1.0.2'
+            classpath 'io.github.FlyJingFish.FastTransform:fast-transform:1.0.3'
         }
     }
     apply plugin: "fast.dex"
@@ -181,7 +181,7 @@ abstract class MyClassesTask : DefaultTransformTask() {
   //必须项 👇
   plugins {
       ...
-      id "io.github.FlyJingFish.FastTransform" version "1.0.2"
+      id "io.github.FlyJingFish.FastTransform" version "1.0.3"
   }
   ```
 

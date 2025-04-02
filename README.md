@@ -42,7 +42,7 @@ The version requires AGP 7.6 or above
 ```gradle
 
 dependencies {
-    implementation 'io.github.FlyJingFish.FastTransform:fast-transform:1.0.2'
+    implementation 'io.github.FlyJingFish.FastTransform:fast-transform:1.0.3'
 }
 ```
 
@@ -160,7 +160,7 @@ Depend on the plugin in `build.gradle` in the **project root directory**
     
     plugins {
         //Required items 👇 Note that the apply setting must be true
-        id "io.github.FlyJingFish.FastTransform" version "1.0.2" apply true
+        id "io.github.FlyJingFish.FastTransform" version "1.0.3" apply true
     }
     ```
 
@@ -170,7 +170,7 @@ Depend on the plugin in `build.gradle` in the **project root directory**
     buildscript {
         dependencies {
             //Required items 👇
-            classpath 'io.github.FlyJingFish.FastTransform:fast-transform:1.0.2'
+            classpath 'io.github.FlyJingFish.FastTransform:fast-transform:1.0.3'
         }
     }
     apply plugin: "fast.dex"
@@ -184,7 +184,7 @@ In `build.gradle` in the **app module** Dependency plugins in
 //Required items 👇 
 plugins { 
     ... 
-    id "io.github.FlyJingFish.FastTransform" version "1.0.2" 
+    id "io.github.FlyJingFish.FastTransform" version "1.0.3" 
 
 ```
 
