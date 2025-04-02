@@ -23,12 +23,12 @@ fun Variant.toTransformAll(taskProvider: TaskProvider<out DefaultTransformTask>,
         var dexTask : DexArchiveBuilderTask? =null
         var thisTask : DefaultTransformTask? =null
         val thisTaskClass = taskProvider.get().javaClass
-        var isFastDex = false
+        var isForceFastDex = false
         val isSet = try {
             project.rootProject.gradle.taskGraph.afterTask {
                 if (it == lastCanModifyTask){
                     dexTask?.let { doTask ->
-                        if (thisTask != null && !thisTask!!.isFastDex && isFastDex){
+                        if (isForceFastDex && thisTask != null && !thisTask!!.isFastDex){
                             val fastDexTask = FastDexTask(doTask)
                             fastDexTask.taskAction()
                         }
@@ -50,16 +50,16 @@ fun Variant.toTransformAll(taskProvider: TaskProvider<out DefaultTransformTask>,
                 }
                 lastCanModifyTask = task
             }
-            if (lastCanModifyTask != null && dexTask != null && thisTask != null){
-                if (thisTask!!.isFastDex && lastCanModifyTask!!.javaClass != thisTaskClass){
-                    isFastDex = true
-                    thisTask!!.isFastDex = false
-                    if (!isSet){
-                        lastCanModifyTask?.doLast { _->
-                            dexTask?.let { doTask ->
-                                val fastDexTask = FastDexTask(doTask)
-                                fastDexTask.taskAction()
-                            }
+            if (lastCanModifyTask != null && dexTask != null && thisTask != null
+                    && thisTask!!.isFastDex && lastCanModifyTask!!.javaClass != thisTaskClass
+                    && !(lastCanModifyTask is DefaultTransformTask && (lastCanModifyTask as DefaultTransformTask).isFastDex)){
+                isForceFastDex = true
+                thisTask!!.isFastDex = false
+                if (!isSet){
+                    lastCanModifyTask?.doLast { _->
+                        dexTask?.let { doTask ->
+                            val fastDexTask = FastDexTask(doTask)
+                            fastDexTask.taskAction()
                         }
                     }
                 }
