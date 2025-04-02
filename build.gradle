@@ -75,6 +75,7 @@ task aaBumpVersion() {
         versionProps.store(versionPropsFile.newWriter(), null)
 
         updateREADME("README.md",oldVersionName,newVersionName)
+        updateREADME("README-zh.md",oldVersionName,newVersionName)
 
         File gradleFile = new File("gradle.properties")
         String gradleText = gradleFile.text
@@ -105,6 +106,7 @@ def updateREADME(readme,oldVersionName,newVersionName) {
     File configFile = new File(readme)
     String exportText = configFile.text
     String text = exportText.replace("io.github.FlyJingFish.FastTransform:fast-transform:"+oldVersionName,"io.github.FlyJingFish.FastTransform:fast-transform:"+newVersionName)
+    text = text.replace("id \"io.github.FlyJingFish.FastTransform\" version \""+oldVersionName+"\"","id \"io.github.FlyJingFish.FastTransform\" version \""+newVersionName+"\"")
     configFile.write(text)
 }
 
