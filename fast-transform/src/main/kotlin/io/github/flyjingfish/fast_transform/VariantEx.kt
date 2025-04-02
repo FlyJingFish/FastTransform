@@ -6,33 +6,40 @@ import com.android.build.api.variant.Variant
 import com.android.build.gradle.internal.tasks.DexArchiveBuilderTask
 import io.github.flyjingfish.fast_transform.tasks.DefaultTransformTask
 import io.github.flyjingfish.fast_transform.tasks.FastDexTask
-import org.gradle.api.Project
+import io.github.flyjingfish.fast_transform.utils.printLog
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.configurationcache.extensions.capitalized
+
+private val IsSetMap = mutableMapOf<String, Boolean>()
 
 /**
  * @param taskProvider 注册的任务的 TaskProvider
  * @param fastDex 是否是加速打包模式
  */
-private val IsSetMap = mutableMapOf<Project,Boolean>()
-fun Variant.toTransformAll(taskProvider: TaskProvider<out DefaultTransformTask>, fastDex:Boolean = true){
+fun Variant.toTransformAll(
+    taskProvider: TaskProvider<out DefaultTransformTask>,
+    fastDex: Boolean = true
+) {
+    val thisTaskClass = taskProvider.get().javaClass
     val project = taskProvider.get().project
-    if (fastDex && IsSetMap[project] != true){
-        var lastCanModifyTask : Task? =null
-        var dexTask : DexArchiveBuilderTask? =null
-        var thisTask : DefaultTransformTask? =null
-        val thisTaskClass = taskProvider.get().javaClass
-        var isForceFastDex = false
+    val isSetKey = "${System.identityHashCode(project)}${thisTaskClass.name}"
+    printLog("=====>$isSetKey")
+    var isResetFrom = false
+    if (fastDex && IsSetMap[isSetKey] != true) {
+        var lastTask: Task? = null
+        var dexTask: DexArchiveBuilderTask? = null
+        var thisTask: DefaultTransformTask? = null
+
+        var isForceFastDex = true
         val isSet = try {
             project.rootProject.gradle.taskGraph.afterTask {
-                if (it == lastCanModifyTask){
-                    val doDexTask = dexTask
-                    val doThisTask = thisTask
-                    doDexTask?.let { doTask ->
-                        if (isForceFastDex && doThisTask != null && !doThisTask.isFastDex){
+                if (it == lastTask) {
+                    dexTask?.let { doTask ->
+                        if (isForceFastDex) {
                             val fastDexTask = FastDexTask(doTask)
                             fastDexTask.taskAction()
+                            printLog("$isSetKey ===> taskAction")
                         }
                     }
                 }
@@ -42,27 +49,29 @@ fun Variant.toTransformAll(taskProvider: TaskProvider<out DefaultTransformTask>,
             false
         }
         project.rootProject.gradle.taskGraph.addTaskExecutionGraphListener {
+            var nextTask: Task? = null
             for (task in it.allTasks) {
-                if (task.javaClass == thisTaskClass){
+                if (task.javaClass == thisTaskClass) {
                     thisTask = task as DefaultTransformTask
+                    nextTask = it.allTasks[it.allTasks.indexOf(thisTask)+1]
                 }
-                if (task is DexArchiveBuilderTask){
+                if (task is DexArchiveBuilderTask) {
                     dexTask = task
                     break
                 }
-                lastCanModifyTask = task
+                lastTask = task
             }
-            val doLastCanModifyTask = lastCanModifyTask
+            val doLastTask = lastTask
             val doDexTask = dexTask
             val doThisTask = thisTask
-            if (doLastCanModifyTask != null && doDexTask != null && doThisTask != null
-                    && doThisTask.isFastDex && doLastCanModifyTask.javaClass != thisTaskClass
-                    && (doLastCanModifyTask !is DefaultTransformTask || !doLastCanModifyTask.isFastDex)){
+            if (doLastTask != null && doDexTask != null && doThisTask != null
+                && doThisTask.isFastDex && doLastTask.javaClass != thisTaskClass
+                && (doLastTask !is DefaultTransformTask || !doLastTask.isFastDex)
+            ) {
                 isForceFastDex = true
-                doThisTask.isFastDex = false
 
-                if (!isSet){
-                    doLastCanModifyTask.doLast { _->
+                if (!isSet) {
+                    doLastTask.doLast { _ ->
                         doDexTask.let { doTask ->
                             val fastDexTask = FastDexTask(doTask)
                             fastDexTask.taskAction()
@@ -70,8 +79,35 @@ fun Variant.toTransformAll(taskProvider: TaskProvider<out DefaultTransformTask>,
                     }
                 }
             }
+            if (nextTask != null && nextTask != doDexTask) {
+                if (nextTask !is DefaultTransformTask) {
+                    doThisTask?.isFastDex = false
+                }
+                isResetFrom = false
+            }
+
+            printLog("$isSetKey ===> $isForceFastDex")
+
+            doDexTask?.doFirst {
+                val dexTask = it as DexArchiveBuilderTask
+                for (projectClass in dexTask.projectClasses) {
+                    printLog("projectClass=${projectClass.absolutePath}")
+                }
+                for (projectClass in dexTask.subProjectClasses) {
+                    printLog("subProjectClasses=${projectClass.absolutePath}")
+                }
+                for (projectClass in dexTask.externalLibClasses) {
+                    printLog("externalLibClasses=${projectClass.absolutePath}")
+                }
+                for (projectClass in dexTask.mixedScopeClasses) {
+                    printLog("mixedScopeClasses=${projectClass.absolutePath}")
+                }
+                for (projectClass in dexTask.externalLibDexFiles) {
+                    printLog("externalLibDexFiles=${projectClass.absolutePath}")
+                }
+            }
         }
-        IsSetMap[project] = true
+        IsSetMap[isSetKey] = true
     }
 
     artifacts
@@ -84,28 +120,33 @@ fun Variant.toTransformAll(taskProvider: TaskProvider<out DefaultTransformTask>,
             if (fastDex) DefaultTransformTask::hideOutputDir else DefaultTransformTask::hideOutputFile
         )
     taskProvider.configure {
-        val outDir = it.project.layout.buildDirectory.file("intermediates/classes/${taskProvider.name}/All/")
-        val outFile = it.project.layout.buildDirectory.file("intermediates/classes/${taskProvider.name}/All/classes.jar")
-        if (fastDex){
-            it.doFirst{
-                if (outFile.get().asFile.exists()){
+        val outDir =
+            it.project.layout.buildDirectory.file("intermediates/classes/${taskProvider.name}/All/")
+        val outFile =
+            it.project.layout.buildDirectory.file("intermediates/classes/${taskProvider.name}/All/classes.jar")
+        if (fastDex) {
+            it.doFirst {
+                if (outFile.get().asFile.exists()) {
                     outFile.get().asFile.delete()
                 }
-                IsSetMap[project] = false
-                if (!outDir.get().asFile.exists()){
+                IsSetMap[isSetKey] = false
+                if (!outDir.get().asFile.exists()) {
                     outDir.get().asFile.mkdirs()
                 }
             }
             it.doLast { aopTask ->
-                if (aopTask is DefaultTransformTask && aopTask.isFastDex){
+                if (aopTask is DefaultTransformTask && aopTask.isFastDex && isResetFrom) {
                     val dexTaskName = "dexBuilder${name.capitalized()}"
-                    it.project.tasks.withType(DexArchiveBuilderTask::class.java).forEach { dexTask ->
-                        if (dexTaskName == dexTask?.name){
-                            outDir.get().asFile.listFiles()?.filter { file -> file.name != outFile.get().asFile.name}?.let { files ->
-                                dexTask.projectClasses.setFrom(files)
+                    it.project.tasks.withType(DexArchiveBuilderTask::class.java)
+                        .forEach { dexTask ->
+                            if (dexTaskName == dexTask?.name) {
+                                outDir.get().asFile.listFiles()
+                                    ?.filter { file -> file.name != outFile.get().asFile.name }
+                                    ?.let { files ->
+                                        dexTask.projectClasses.setFrom(files)
+                                    }
                             }
                         }
-                    }
                 }
             }
         }
