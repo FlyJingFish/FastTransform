@@ -19,24 +19,47 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
 
-class FastDexTask(private val outputDir: File, private val singleJar : File, private val dexTask : DexArchiveBuilderTask) {
+class FastDexTask(private val dexTask : DexArchiveBuilderTask) {
 
 
     private val is1ClassesJar = true
-
-
-    private fun readyAll(){
-        jarEntryCaches.clear()
-        if (!outputDir.exists()){
-            outputDir.mkdirs()
+    private lateinit var outputDir: File
+    private lateinit var singleJar : File
+    private fun interceptTask():Boolean{
+        val classesList = mutableSetOf<String>()
+        for (projectClass in dexTask.projectClasses) {
+            classesList.add(projectClass.absolutePath)
         }
+        val classFileList = classesList.map(::File)
+
+        if (classFileList.size == 1){
+            if (classFileList[0].isFile && classFileList[0].absolutePath.endsWith(".jar")){
+                val outDir = dexTask.project.layout.buildDirectory.file("intermediates/classes/${dexTask.name}FastDex/All/")
+                outputDir = outDir.get().asFile
+                singleJar = classFileList[0]
+                jarEntryCaches.clear()
+                if (!outputDir.exists()){
+                    outputDir.mkdirs()
+                }
+                return false
+            }else if (classFileList[0].isDirectory){
+                val outputDir = classFileList[0]
+                outputDir.listFiles()?.let { files ->
+                    dexTask.projectClasses.setFrom(files)
+                }
+                return true
+            }
+        }
+        return true
     }
 
     /**
      * 不要重写此方法
      */
     fun taskAction() {
-        readyAll()
+        if (interceptTask()){
+            return
+        }
         startTask()
         writeJar()
 

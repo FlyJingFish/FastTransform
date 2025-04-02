@@ -4,7 +4,6 @@ import com.android.build.gradle.internal.tasks.DexArchiveBuilderTask
 import io.github.flyjingfish.fast_transform.tasks.FastDexTask
 import org.gradle.api.Project
 import org.gradle.api.Task
-import java.io.File
 
 fun Project.fastDex(){
     rootProject.gradle.taskGraph.addTaskExecutionGraphListener {
@@ -18,17 +17,9 @@ fun Project.fastDex(){
             lastCanModifyTask = task
         }
         lastCanModifyTask?.doLast { _->
-            if (dexTask != null){
-                val classesList = mutableSetOf<String>()
-                for (projectClass in dexTask.projectClasses) {
-                    classesList.add(projectClass.absolutePath)
-                }
-                val classFileList = classesList.map(::File)
-                if (classFileList.size == 1 && classFileList[0].absolutePath.endsWith(".jar")){
-                    val outDir = layout.buildDirectory.file("intermediates/classes/${dexTask.name}/All/")
-                    val fastDexTask = FastDexTask(outDir.get().asFile,classFileList[0],dexTask)
-                    fastDexTask.taskAction()
-                }
+            dexTask?.let { doTask ->
+                val fastDexTask = FastDexTask(doTask)
+                fastDexTask.taskAction()
             }
         }
 //        dexTask?.doFirst {
