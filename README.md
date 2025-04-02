@@ -146,6 +146,48 @@ abstract class MyClassesTask : DefaultTransformTask() {
 
 ```
 
+## Directly accelerate existing projects
+
+If your existing project has a plugin that uses `toTransform`, and it does not use this framework or follow the design of this framework, you can choose one of the following methods to accelerate your project
+
+### Method 1
+
+Depend on the plugin in `build.gradle` in the **project root directory**
+
+- New version
+
+    ```gradle
+    
+    plugins {
+        //Required items 👇 Note that the apply setting must be true
+        id "io.github.FlyJingFish.FastTransform" version "1.0.2" apply true
+    }
+    ```
+
+- Or old version
+
+    ```gradle
+    buildscript {
+        dependencies {
+            //Required items 👇
+            classpath 'io.github.FlyJingFish.FastTransform:fast-transform:1.0.2'
+        }
+    }
+    apply plugin: "fast.dex"
+    ```
+
+### Method 2
+
+In `build.gradle` in the **app module** Dependency plugins in 
+
+```gradle 
+//Required items 👇 
+plugins { 
+    ... 
+    id "io.github.FlyJingFish.FastTransform" version "1.0.2" 
+
+```
+
 ### Finally, I recommend some other libraries I wrote
 
 - [AndroidAOP helps Android App transform into an AOP architecture framework. With just one annotation, you can request permissions, switch threads, prohibit multiple clicks, monitor all click events at once, monitor life cycle, etc.](https://github.com/FlyJingFish/AndroidAOP)

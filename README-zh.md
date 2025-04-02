@@ -149,16 +149,17 @@ abstract class MyClassesTask : DefaultTransformTask() {
 
 ## 直接加速现有项目
 
+你现有的项目存在使用 `toTransform` 的插件，而它没有使用本框架或遵循本框架的设计，则可以选择下边一种方式去加速你的项目
 
-### 在 **项目根目录** 的 `build.gradle` 里依赖插件
-
+### 方式一
+在 **项目根目录** 的 `build.gradle` 里依赖插件
 - 新版本
 
   ```gradle
   
   plugins {
       //必须项 👇 注意 apply 设置必须为 true 
-      id "io.github.FlyJingFish.FastTransform" version "1.0.2" apply false
+      id "io.github.FlyJingFish.FastTransform" version "1.0.2" apply true
   }
   ```
 
@@ -171,10 +172,11 @@ abstract class MyClassesTask : DefaultTransformTask() {
             classpath 'io.github.FlyJingFish.FastTransform:fast-transform:1.0.2'
         }
     }
+    apply plugin: "fast.dex"
   ```
 
-### 在 **app 所在module** 的 `build.gradle` 里依赖插件
-
+### 方式二
+在 **app 所在module** 的 `build.gradle` 里依赖插件
   ```gradle
   //必须项 👇
   plugins {
@@ -182,7 +184,6 @@ abstract class MyClassesTask : DefaultTransformTask() {
       id "io.github.FlyJingFish.FastTransform" version "1.0.2"
   }
   ```
-
 
 ### 最后推荐我写的另外一些库
 
