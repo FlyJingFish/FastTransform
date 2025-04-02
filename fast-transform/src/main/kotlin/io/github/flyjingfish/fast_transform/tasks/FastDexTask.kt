@@ -3,6 +3,7 @@ package io.github.flyjingfish.fast_transform.tasks
 import com.android.build.gradle.internal.tasks.DexArchiveBuilderTask
 import io.github.flyjingfish.fast_transform.beans.EntryCache
 import io.github.flyjingfish.fast_transform.utils.computeMD5
+import io.github.flyjingfish.fast_transform.utils.getNewJarName
 import io.github.flyjingfish.fast_transform.utils.isChange
 import io.github.flyjingfish.fast_transform.utils.saveEntry
 import kotlinx.coroutines.Deferred
@@ -164,18 +165,7 @@ class FastDexTask(private val dexTask : DexArchiveBuilderTask) {
      * 如果 [isFastDex] = true 此方法只是暂存，最后统一写入jar，[isFastDex] = false 则直接写入jar
      */
     fun File.saveJarEntry(jarEntryName: String,byteArray: ByteArray){
-        val jarFileName = absolutePath.computeMD5()
-
-        val parts = jarEntryName.split("/")
-        val jarName = if (is1ClassesJar){
-            when {
-                parts.size >= 4 -> parts.subList(0, 3).joinToString("/").computeMD5()
-                parts.size > 1 -> parts.dropLast(1).joinToString("/").computeMD5()
-                else -> jarFileName
-            }
-        }else{
-            jarFileName
-        }
+        val jarName = getNewJarName(is1ClassesJar, jarEntryName)
 
         val entryCaches = jarEntryCaches.computeIfAbsent(jarName) { mutableListOf() }
         synchronized(entryCaches){

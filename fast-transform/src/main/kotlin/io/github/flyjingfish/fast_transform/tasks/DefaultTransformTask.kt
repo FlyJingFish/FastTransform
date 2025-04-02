@@ -1,8 +1,8 @@
 package io.github.flyjingfish.fast_transform.tasks
 
-import com.android.build.api.variant.Variant
 import io.github.flyjingfish.fast_transform.beans.EntryCache
-import io.github.flyjingfish.fast_transform.utils.computeMD5
+import io.github.flyjingfish.fast_transform.toTransformAll
+import io.github.flyjingfish.fast_transform.utils.getNewJarName
 import io.github.flyjingfish.fast_transform.utils.isChange
 import io.github.flyjingfish.fast_transform.utils.saveEntry
 import kotlinx.coroutines.Deferred
@@ -28,7 +28,6 @@ import java.io.InputStream
 import java.util.concurrent.ConcurrentHashMap
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
-import io.github.flyjingfish.fast_transform.toTransformAll
 
 abstract class DefaultTransformTask: DefaultTask() {
     /**
@@ -218,18 +217,7 @@ abstract class DefaultTransformTask: DefaultTask() {
      */
     fun File.saveJarEntry(jarEntryName: String,byteArray: ByteArray){
         if (isFastDex){
-            val jarFileName = absolutePath.computeMD5()
-
-            val parts = jarEntryName.split("/")
-            val jarName = if (is1ClassesJar){
-                when {
-                    parts.size >= 4 -> parts.subList(0, 3).joinToString("/").computeMD5()
-                    parts.size > 1 -> parts.dropLast(1).joinToString("/").computeMD5()
-                    else -> jarFileName
-                }
-            }else{
-                jarFileName
-            }
+            val jarName = getNewJarName(is1ClassesJar, jarEntryName)
 
             val entryCaches = jarEntryCaches.computeIfAbsent(jarName) { mutableListOf() }
             synchronized(entryCaches){

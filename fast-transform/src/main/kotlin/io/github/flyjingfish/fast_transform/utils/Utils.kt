@@ -1,6 +1,7 @@
 package io.github.flyjingfish.fast_transform.utils
 
 import io.github.flyjingfish.fast_transform.beans.EntryCache
+import java.io.File
 import java.io.InputStream
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -54,4 +55,19 @@ fun JarOutputStream.saveEntry(entryName: String, data: ByteArray) {
         write(data)
         closeEntry()
     }
+}
+
+fun File.getNewJarName(is1ClassesJar :Boolean,jarEntryName: String):String{
+    val jarFileName = absolutePath.computeMD5()
+    val parts = jarEntryName.split("/")
+    return if (is1ClassesJar){
+        when {
+            parts.size >= 3 -> parts.subList(0, 2).joinToString("/").computeMD5()
+            parts.size > 1 -> parts.dropLast(1).joinToString("/").computeMD5()
+            else -> jarFileName
+        }
+    }else{
+        jarFileName
+    }
+
 }
