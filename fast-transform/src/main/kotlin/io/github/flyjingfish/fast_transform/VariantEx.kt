@@ -18,6 +18,7 @@ import org.gradle.configurationcache.extensions.capitalized
 private val IsSetMap = mutableMapOf<Project,Boolean>()
 fun Variant.toTransformAll(taskProvider: TaskProvider<out DefaultTransformTask>, fastDex:Boolean = true){
     val project = taskProvider.get().project
+    println("project=${project.rootProject.name}")
     if (fastDex && IsSetMap[project] != true){
         var lastCanModifyTask : Task? =null
         var dexTask : DexArchiveBuilderTask? =null
@@ -57,9 +58,10 @@ fun Variant.toTransformAll(taskProvider: TaskProvider<out DefaultTransformTask>,
             val doThisTask = thisTask
             if (doLastCanModifyTask != null && doDexTask != null && doThisTask != null
                     && doThisTask.isFastDex && doLastCanModifyTask.javaClass != thisTaskClass
-                    && !(doLastCanModifyTask is DefaultTransformTask && !doLastCanModifyTask.isFastDex)){
+                    && (doLastCanModifyTask !is DefaultTransformTask || !doLastCanModifyTask.isFastDex)){
                 isForceFastDex = true
                 doThisTask.isFastDex = false
+
                 if (!isSet){
                     doLastCanModifyTask.doLast { _->
                         doDexTask.let { doTask ->
