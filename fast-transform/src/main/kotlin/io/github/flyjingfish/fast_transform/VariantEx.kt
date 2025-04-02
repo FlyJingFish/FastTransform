@@ -87,6 +87,9 @@ fun Variant.toTransformAll(taskProvider: TaskProvider<out DefaultTransformTask>,
         val outFile = it.project.layout.buildDirectory.file("intermediates/classes/${taskProvider.name}/All/classes.jar")
         if (fastDex){
             it.doFirst{
+                if (outFile.get().asFile.exists()){
+                    outFile.get().asFile.delete()
+                }
                 IsSetMap[project] = false
                 if (!outDir.get().asFile.exists()){
                     outDir.get().asFile.mkdirs()
