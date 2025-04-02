@@ -27,8 +27,10 @@ fun Variant.toTransformAll(taskProvider: TaskProvider<out DefaultTransformTask>,
         val isSet = try {
             project.rootProject.gradle.taskGraph.afterTask {
                 if (it == lastCanModifyTask){
-                    dexTask?.let { doTask ->
-                        if (isForceFastDex && thisTask != null && !thisTask!!.isFastDex){
+                    val doDexTask = dexTask
+                    val doThisTask = thisTask
+                    doDexTask?.let { doTask ->
+                        if (isForceFastDex && doThisTask != null && !doThisTask.isFastDex){
                             val fastDexTask = FastDexTask(doTask)
                             fastDexTask.taskAction()
                         }
@@ -50,14 +52,17 @@ fun Variant.toTransformAll(taskProvider: TaskProvider<out DefaultTransformTask>,
                 }
                 lastCanModifyTask = task
             }
-            if (lastCanModifyTask != null && dexTask != null && thisTask != null
-                    && thisTask!!.isFastDex && lastCanModifyTask!!.javaClass != thisTaskClass
-                    && !(lastCanModifyTask is DefaultTransformTask && (lastCanModifyTask as DefaultTransformTask).isFastDex)){
+            val doLastCanModifyTask = lastCanModifyTask
+            val doDexTask = dexTask
+            val doThisTask = thisTask
+            if (doLastCanModifyTask != null && doDexTask != null && doThisTask != null
+                    && doThisTask.isFastDex && doLastCanModifyTask.javaClass != thisTaskClass
+                    && !(doLastCanModifyTask is DefaultTransformTask && !doLastCanModifyTask.isFastDex)){
                 isForceFastDex = true
-                thisTask!!.isFastDex = false
+                doThisTask.isFastDex = false
                 if (!isSet){
-                    lastCanModifyTask?.doLast { _->
-                        dexTask?.let { doTask ->
+                    doLastCanModifyTask.doLast { _->
+                        doDexTask.let { doTask ->
                             val fastDexTask = FastDexTask(doTask)
                             fastDexTask.taskAction()
                         }
