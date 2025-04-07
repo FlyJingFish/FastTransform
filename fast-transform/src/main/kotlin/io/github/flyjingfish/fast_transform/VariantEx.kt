@@ -29,7 +29,7 @@ fun Variant.toTransformAll(
     val project = taskProvider.get().project
     val isSetKey = "${System.identityHashCode(project)}${thisTaskClass.name}${System.identityHashCode(taskProvider)}"
     printLog("=====>$isSetKey")
-    var isResetFrom = false
+    var isNotSetFrom = false
     if (fastDex && IsSetMap[isSetKey] != true) {
         var lastTask: Task? = null
         var dexTask: DexArchiveBuilderTask? = null
@@ -101,7 +101,7 @@ fun Variant.toTransformAll(
                     if (nextTask !is DefaultTransformTask) {
                         doThisTask?.isFastDex = false
                     }
-                    isResetFrom = false
+                    isNotSetFrom = true
                 }
 
                 printLog("$isSetKey ===> $isForceFastDex")
@@ -156,7 +156,7 @@ fun Variant.toTransformAll(
                 }
             }
             it.doLast { aopTask ->
-                if (aopTask is DefaultTransformTask && aopTask.isFastDex && isResetFrom) {
+                if (aopTask is DefaultTransformTask && aopTask.isFastDex && !isNotSetFrom) {
                     val dexTaskName = "dexBuilder${name.capitalized()}"
                     it.project.tasks.withType(DexArchiveBuilderTask::class.java)
                         .forEach { dexTask ->
