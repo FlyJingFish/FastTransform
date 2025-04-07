@@ -8,7 +8,11 @@ import io.github.flyjingfish.fast_transform.tasks.DefaultTransformTask
 import io.github.flyjingfish.fast_transform.tasks.FastDexTask
 import io.github.flyjingfish.fast_transform.utils.printLog
 import org.gradle.api.Task
+import org.gradle.api.execution.TaskExecutionGraph
+import org.gradle.api.execution.TaskExecutionGraphListener
+import org.gradle.api.execution.TaskExecutionListener
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.TaskState
 import org.gradle.configurationcache.extensions.capitalized
 
 private val IsSetMap = mutableMapOf<String, Boolean>()
@@ -23,7 +27,7 @@ fun Variant.toTransformAll(
 ) {
     val thisTaskClass = taskProvider.get().javaClass
     val project = taskProvider.get().project
-    val isSetKey = "${System.identityHashCode(project)}${thisTaskClass.name}"
+    val isSetKey = "${System.identityHashCode(project)}${thisTaskClass.name}${System.identityHashCode(taskProvider)}"
     printLog("=====>$isSetKey")
     var isResetFrom = false
     if (fastDex && IsSetMap[isSetKey] != true) {
@@ -31,82 +35,99 @@ fun Variant.toTransformAll(
         var dexTask: DexArchiveBuilderTask? = null
         var thisTask: DefaultTransformTask? = null
 
-        var isForceFastDex = true
+        var isForceFastDex = false
         val isSet = try {
-            project.rootProject.gradle.taskGraph.afterTask {
-                if (it == lastTask) {
-                    dexTask?.let { doTask ->
-                        if (isForceFastDex) {
-                            val fastDexTask = FastDexTask(doTask)
-                            fastDexTask.taskAction()
-                            printLog("$isSetKey ===> taskAction")
+            project.rootProject.gradle.taskGraph.addTaskExecutionListener(object :
+                TaskExecutionListener {
+                override fun beforeExecute(p0: Task) {
+                }
+
+                override fun afterExecute(p0: Task, p1: TaskState) {
+                    if (thisTask != taskProvider.get()){
+                        return
+                    }
+                    if (p0 == lastTask){
+                        dexTask?.let { doTask ->
+                            if (isForceFastDex) {
+                                val fastDexTask = FastDexTask(doTask)
+                                fastDexTask.taskAction()
+                                printLog("$isSetKey ===> taskAction")
+                                project.rootProject.gradle.taskGraph.removeTaskExecutionListener(this)
+                            }
                         }
                     }
                 }
-            }
+
+            })
             true
         } catch (_: Throwable) {
             false
         }
-        project.rootProject.gradle.taskGraph.addTaskExecutionGraphListener {
-            var nextTask: Task? = null
-            for (task in it.allTasks) {
-                if (task.javaClass == thisTaskClass) {
-                    thisTask = task as DefaultTransformTask
-                    nextTask = it.allTasks[it.allTasks.indexOf(thisTask)+1]
+        project.rootProject.gradle.taskGraph.addTaskExecutionGraphListener(object :TaskExecutionGraphListener{
+            override fun graphPopulated(it: TaskExecutionGraph) {
+                var nextTask: Task? = null
+                for (task in it.allTasks) {
+                    if (task.javaClass == thisTaskClass) {
+                        thisTask = task as DefaultTransformTask
+                        nextTask = it.allTasks[it.allTasks.indexOf(thisTask)+1]
+                    }
+                    if (task is DexArchiveBuilderTask) {
+                        dexTask = task
+                        break
+                    }
+                    lastTask = task
                 }
-                if (task is DexArchiveBuilderTask) {
-                    dexTask = task
-                    break
-                }
-                lastTask = task
-            }
-            val doLastTask = lastTask
-            val doDexTask = dexTask
-            val doThisTask = thisTask
-            if (doLastTask != null && doDexTask != null && doThisTask != null
-                && doThisTask.isFastDex && doLastTask.javaClass != thisTaskClass
-                && (doLastTask !is DefaultTransformTask || !doLastTask.isFastDex)
-            ) {
-                isForceFastDex = true
+                val doLastTask = lastTask
+                val doDexTask = dexTask
+                val doThisTask = thisTask
+                if (doLastTask != null && doDexTask != null && doThisTask != null
+                    && doThisTask.isFastDex && doLastTask.javaClass != thisTaskClass
+                    && (doLastTask !is DefaultTransformTask || !doLastTask.isFastDex)
+                ) {
+                    isForceFastDex = true
 
-                if (!isSet) {
-                    doLastTask.doLast { _ ->
-                        doDexTask.let { doTask ->
-                            val fastDexTask = FastDexTask(doTask)
-                            fastDexTask.taskAction()
+                    if (!isSet) {
+                        doLastTask.doLast { _ ->
+                            if (thisTask == taskProvider.get()){
+                                doDexTask.let { doTask ->
+                                    val fastDexTask = FastDexTask(doTask)
+                                    fastDexTask.taskAction()
+                                }
+                            }
                         }
                     }
                 }
-            }
-            if (nextTask != null && nextTask != doDexTask) {
-                if (nextTask !is DefaultTransformTask) {
-                    doThisTask?.isFastDex = false
+                if (nextTask != null && nextTask != doDexTask) {
+                    if (nextTask !is DefaultTransformTask) {
+                        doThisTask?.isFastDex = false
+                    }
+                    isResetFrom = false
                 }
-                isResetFrom = false
+
+                printLog("$isSetKey ===> $isForceFastDex")
+
+                doDexTask?.doFirst {
+                    val dexTask = it as DexArchiveBuilderTask
+                    for (projectClass in dexTask.projectClasses) {
+                        printLog("projectClass=${projectClass.absolutePath}")
+                    }
+                    for (projectClass in dexTask.subProjectClasses) {
+                        printLog("subProjectClasses=${projectClass.absolutePath}")
+                    }
+                    for (projectClass in dexTask.externalLibClasses) {
+                        printLog("externalLibClasses=${projectClass.absolutePath}")
+                    }
+                    for (projectClass in dexTask.mixedScopeClasses) {
+                        printLog("mixedScopeClasses=${projectClass.absolutePath}")
+                    }
+                    for (projectClass in dexTask.externalLibDexFiles) {
+                        printLog("externalLibDexFiles=${projectClass.absolutePath}")
+                    }
+                }
+                project.rootProject.gradle.taskGraph.removeTaskExecutionGraphListener(this)
             }
 
-            printLog("$isSetKey ===> $isForceFastDex")
-
-            doDexTask?.doFirst {
-                val dexTask = it as DexArchiveBuilderTask
-                for (projectClass in dexTask.projectClasses) {
-                    printLog("projectClass=${projectClass.absolutePath}")
-                }
-                for (projectClass in dexTask.subProjectClasses) {
-                    printLog("subProjectClasses=${projectClass.absolutePath}")
-                }
-                for (projectClass in dexTask.externalLibClasses) {
-                    printLog("externalLibClasses=${projectClass.absolutePath}")
-                }
-                for (projectClass in dexTask.mixedScopeClasses) {
-                    printLog("mixedScopeClasses=${projectClass.absolutePath}")
-                }
-                for (projectClass in dexTask.externalLibDexFiles) {
-                    printLog("externalLibDexFiles=${projectClass.absolutePath}")
-                }
-            }
-        }
+        })
         IsSetMap[isSetKey] = true
     }
 

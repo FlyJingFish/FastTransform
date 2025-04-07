@@ -71,7 +71,7 @@ fun File.getNewJarName(is1ClassesJar :Boolean,jarEntryName: String):String{
     }
 
 }
-private var debug = false
+private var debug = true
 fun printLog(text: String) {
     if (debug) {
         println(text)
