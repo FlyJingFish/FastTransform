@@ -25,7 +25,7 @@ gradlePlugin {
     plugins {
         FastTransform {
             // 插件id
-            id = PROJ_GROUP
+            id = PROJ_GROUP+"."+PROJ_NAME
             // 插件全路径
             implementationClass = "io.github.flyjingfish.fast_transform.FastDexPlugin"
             // 插件名称

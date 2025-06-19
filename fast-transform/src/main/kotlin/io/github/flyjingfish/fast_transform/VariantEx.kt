@@ -107,6 +107,9 @@ fun Variant.toTransformAll(
                 printLog("$isSetKey ===> $isForceFastDex")
 
                 doDexTask?.doFirst {
+                    if (thisTask != taskProvider.get()){
+                        return@doFirst
+                    }
                     val dexTask = it as DexArchiveBuilderTask
                     for (projectClass in dexTask.projectClasses) {
                         printLog("projectClass=${projectClass.absolutePath}")
