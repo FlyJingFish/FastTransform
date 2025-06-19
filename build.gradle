@@ -105,8 +105,8 @@ subprojects { subproject ->
 def updateREADME(readme,oldVersionName,newVersionName) {
     File configFile = new File(readme)
     String exportText = configFile.text
-    String text = exportText.replace("io.github.FlyJingFish.FastTransform:fast-transform:"+oldVersionName,"io.github.FlyJingFish.FastTransform:fast-transform:"+newVersionName)
-    text = text.replace("id \"io.github.FlyJingFish.FastTransform\" version \""+oldVersionName+"\"","id \"io.github.FlyJingFish.FastTransform\" version \""+newVersionName+"\"")
+    String text = exportText.replace("io.github.flyjingfish:fasttransform:"+oldVersionName,"io.github.flyjingfish:fasttransform:"+newVersionName)
+    text = text.replace("id \"io.github.flyjingfish.fasttransform\" version \""+oldVersionName+"\"","id \"io.github.flyjingfish.fasttransform\" version \""+newVersionName+"\"")
     configFile.write(text)
 }
 

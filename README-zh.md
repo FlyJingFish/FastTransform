@@ -2,8 +2,8 @@
   <strong>简体中文</strong> | <a href="https://github.com/FlyJingFish/FastTransform/blob/master/README.md">English</a>
 </h4>
 <p align="center">
-  <a href="https://central.sonatype.com/search?q=io.github.flyjingfish.FastTransform"><img
-    src="https://img.shields.io/maven-central/v/io.github.FlyJingFish.FastTransform/fast-transform"
+  <a href="https://central.sonatype.com/artifact/io.github.flyjingfish/fasttransform/"><img
+    src="https://img.shields.io/maven-central/v/io.github.flyjingfish/fasttransform"
     alt="Build"
   /></a>
   <a href="https://github.com/FlyJingFish/FastTransform/stargazers"><img
@@ -43,7 +43,7 @@
 ```gradle
 
 dependencies {
-    implementation 'io.github.FlyJingFish.FastTransform:fast-transform:1.0.5'
+    implementation 'io.github.flyjingfish:fasttransform:1.0.5'
 }
 ```
 
@@ -159,7 +159,7 @@ abstract class MyClassesTask : DefaultTransformTask() {
   
   plugins {
       //必须项 👇 注意 apply 设置必须为 true 
-      id "io.github.FlyJingFish.FastTransform" version "1.0.5" apply true
+      id "io.github.flyjingfish.fasttransform" version "1.0.5" apply true
   }
   ```
 
@@ -169,7 +169,7 @@ abstract class MyClassesTask : DefaultTransformTask() {
     buildscript {
         dependencies {
             //必须项 👇
-            classpath 'io.github.FlyJingFish.FastTransform:fast-transform:1.0.5'
+            classpath 'io.github.flyjingfish:fasttransform:1.0.5'
         }
     }
     apply plugin: "fast.dex"
@@ -181,7 +181,7 @@ abstract class MyClassesTask : DefaultTransformTask() {
   //必须项 👇
   plugins {
       ...
-      id "io.github.FlyJingFish.FastTransform" version "1.0.5"
+      id "io.github.flyjingfish.fasttransform" version "1.0.5"
   }
   ```
 

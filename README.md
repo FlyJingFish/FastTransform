@@ -3,8 +3,8 @@
 </h4>
 
 <p align="center">
-  <a href="https://central.sonatype.com/search?q=io.github.flyjingfish.FastTransform"><img
-    src="https://img.shields.io/maven-central/v/io.github.FlyJingFish.FastTransform/fast-transform"
+  <a href="https://central.sonatype.com/artifact/io.github.flyjingfish/fasttransform/"><img
+    src="https://img.shields.io/maven-central/v/io.github.flyjingfish/fasttransform"
     alt="Build"
   /></a>
   <a href="https://github.com/FlyJingFish/FastTransform/stargazers"><img
@@ -42,7 +42,7 @@ The version requires AGP 7.6 or above
 ```gradle
 
 dependencies {
-    implementation 'io.github.FlyJingFish.FastTransform:fast-transform:1.0.5'
+    implementation 'io.github.flyjingfish:fasttransform:1.0.5'
 }
 ```
 
@@ -160,7 +160,7 @@ Depend on the plugin in `build.gradle` in the **project root directory**
     
     plugins {
         //Required items 👇 Note that the apply setting must be true
-        id "io.github.FlyJingFish.FastTransform" version "1.0.5" apply true
+        id "io.github.flyjingfish.fasttransform" version "1.0.5" apply true
     }
     ```
 
@@ -170,7 +170,7 @@ Depend on the plugin in `build.gradle` in the **project root directory**
     buildscript {
         dependencies {
             //Required items 👇
-            classpath 'io.github.FlyJingFish.FastTransform:fast-transform:1.0.5'
+            classpath 'io.github.flyjingfish:fasttransform:1.0.5'
         }
     }
     apply plugin: "fast.dex"
@@ -184,7 +184,7 @@ In `build.gradle` in the **app module** Dependency plugins in
 //Required items 👇 
 plugins { 
     ... 
-    id "io.github.FlyJingFish.FastTransform" version "1.0.5" 
+    id "io.github.flyjingfish.fasttransform" version "1.0.5" 
 
 ```
 
