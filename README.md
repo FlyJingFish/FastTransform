@@ -160,7 +160,7 @@ Depend on the plugin in `build.gradle` in the **project root directory**
     
     plugins {
         //Required items 👇 Note that the apply setting must be true
-        id "io.github.flyjingfish.fasttransform" version "1.0.6" apply true
+        id "io.github.FlyJingFish.FastTransform" version "1.0.6" apply true
     }
     ```
 
@@ -184,7 +184,7 @@ In `build.gradle` in the **app module** Dependency plugins in
 //Required items 👇 
 plugins { 
     ... 
-    id "io.github.flyjingfish.fasttransform" version "1.0.6" 
+    id "io.github.FlyJingFish.FastTransform" version "1.0.6" 
 
 ```
 

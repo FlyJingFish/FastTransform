@@ -159,7 +159,7 @@ abstract class MyClassesTask : DefaultTransformTask() {
   
   plugins {
       //必须项 👇 注意 apply 设置必须为 true 
-      id "io.github.flyjingfish.fasttransform" version "1.0.6" apply true
+      id "io.github.FlyJingFish.FastTransform" version "1.0.6" apply true
   }
   ```
 
@@ -181,7 +181,7 @@ abstract class MyClassesTask : DefaultTransformTask() {
   //必须项 👇
   plugins {
       ...
-      id "io.github.flyjingfish.fasttransform" version "1.0.6"
+      id "io.github.FlyJingFish.FastTransform" version "1.0.6"
   }
   ```
 
