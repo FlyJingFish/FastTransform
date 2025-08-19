@@ -6,6 +6,7 @@ import com.android.build.api.variant.Variant
 import com.android.build.gradle.internal.tasks.DexArchiveBuilderTask
 import io.github.flyjingfish.fast_transform.tasks.DefaultTransformTask
 import io.github.flyjingfish.fast_transform.tasks.FastDexTask
+import io.github.flyjingfish.fast_transform.utils.RecordFrom
 import io.github.flyjingfish.fast_transform.utils.printLog
 import org.gradle.api.Task
 import org.gradle.api.execution.TaskExecutionGraph
@@ -53,6 +54,10 @@ fun Variant.toTransformAll(
                                 fastDexTask.taskAction()
                                 printLog("$isSetKey ===> taskAction")
                                 project.rootProject.gradle.taskGraph.removeTaskExecutionListener(this)
+                            }else {
+                                if (p1.upToDate){
+                                    RecordFrom.setLastFrom(doTask)
+                                }
                             }
                         }
                     }
@@ -167,7 +172,7 @@ fun Variant.toTransformAll(
                                 outDir.get().asFile.listFiles()
                                     ?.filter { file -> file.name != outFile.get().asFile.name }
                                     ?.let { files ->
-                                        dexTask.projectClasses.setFrom(files)
+                                        RecordFrom.setFrom(dexTask, files)
                                     }
                             }
                         }

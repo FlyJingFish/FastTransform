@@ -2,7 +2,7 @@ package io.github.flyjingfish.fast_transform.tasks
 
 import com.android.build.gradle.internal.tasks.DexArchiveBuilderTask
 import io.github.flyjingfish.fast_transform.beans.EntryCache
-import io.github.flyjingfish.fast_transform.utils.computeMD5
+import io.github.flyjingfish.fast_transform.utils.RecordFrom
 import io.github.flyjingfish.fast_transform.utils.getNewJarName
 import io.github.flyjingfish.fast_transform.utils.isChange
 import io.github.flyjingfish.fast_transform.utils.saveEntry
@@ -46,7 +46,7 @@ class FastDexTask(private val dexTask : DexArchiveBuilderTask) {
             }else if (classFileList[0].isDirectory){
                 val outputDir = classFileList[0]
                 outputDir.listFiles()?.let { files ->
-                    dexTask.projectClasses.setFrom(files)
+                    RecordFrom.setFrom(dexTask, files)
                 }
                 return true
             }
@@ -65,7 +65,7 @@ class FastDexTask(private val dexTask : DexArchiveBuilderTask) {
         writeJar()
 
         outputDir.listFiles()?.filter { file -> file.name != singleJar.name}?.let { files ->
-            dexTask.projectClasses.setFrom(files)
+            RecordFrom.setFrom(dexTask, files)
         }
     }
 
