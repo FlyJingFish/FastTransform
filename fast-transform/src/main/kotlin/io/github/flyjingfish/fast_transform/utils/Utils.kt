@@ -1,6 +1,7 @@
 package io.github.flyjingfish.fast_transform.utils
 
 import io.github.flyjingfish.fast_transform.beans.EntryCache
+import org.gradle.api.Project
 import java.io.File
 import java.io.InputStream
 import java.security.MessageDigest
@@ -81,4 +82,11 @@ fun printLog(text: String) {
 fun isWindows(): Boolean {
     val os = System.getProperty("os.name").lowercase()
     return os.contains("win")
+}
+fun String.adapterOSPath():String {
+    return replace('/',File.separatorChar)
+}
+fun Project.getBuildDirectory():File{
+//    return buildDir
+    return project.layout.buildDirectory.get().asFile
 }

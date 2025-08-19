@@ -2,17 +2,19 @@ package io.github.flyjingfish.fast_transform
 
 import com.android.build.gradle.internal.tasks.DexArchiveBuilderTask
 import io.github.flyjingfish.fast_transform.tasks.FastDexTask
+import io.github.flyjingfish.fast_transform.utils.RuntimeProject
 import org.gradle.api.Project
 import org.gradle.api.Task
 
 fun Project.fastDex(){
     var lastCanModifyTask : Task? =null
     var dexTask : DexArchiveBuilderTask? =null
+    val runtimeProject = RuntimeProject.get(this)
     val isSet = try {
         project.rootProject.gradle.taskGraph.afterTask {
             if (it == lastCanModifyTask){
                 dexTask?.let { doTask ->
-                    val fastDexTask = FastDexTask(doTask)
+                    val fastDexTask = FastDexTask(doTask, runtimeProject)
                     fastDexTask.taskAction()
                 }
             }
@@ -32,7 +34,7 @@ fun Project.fastDex(){
         if (!isSet){
             lastCanModifyTask?.doLast { _->
                 dexTask?.let { doTask ->
-                    val fastDexTask = FastDexTask(doTask)
+                    val fastDexTask = FastDexTask(doTask, runtimeProject)
                     fastDexTask.taskAction()
                 }
             }
