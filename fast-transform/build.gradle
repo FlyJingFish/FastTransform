@@ -9,7 +9,6 @@ javadoc {
     options.bottom = 'FastTransform'
 }
 apply from: "$rootDir/gradle/java_base.gradle"
-apply from: "$rootDir/gradle/java_publish.gradle"
 
 dependencies {
     implementation gradleApi()
@@ -18,31 +17,28 @@ dependencies {
     implementation libs.kotlinx.coroutines
 }
 
+if (publishGradle == "1"){
+    apply plugin: "com.gradle.plugin-publish"
 // 发布到gradlePluginPortal
-gradlePlugin {
-    website = PROJ_WEBSITEURL
-    vcsUrl = PROJ_VCSURL
-    plugins {
-        FastTransform {
-            // 插件id
-            id = PROJ_GROUP+"."+PROJ_NAME
-            // 插件全路径
-            implementationClass = "io.github.flyjingfish.fast_transform.FastDexPlugin"
-            // 插件名称
-            displayName = 'FastTransform Plugin'
-            //描述
-            description = PROJ_DESCRIPTION
-            //标签
-            tags.addAll('FastTransform', 'FlyJingFish', 'android', 'aop')
+    gradlePlugin {
+        website = PROJ_WEBSITEURL
+        vcsUrl = PROJ_VCSURL
+        plugins {
+            FastTransform {
+                // 插件id
+                id = PROJ_GROUP+"."+PROJ_NAME
+                // 插件全路径
+                implementationClass = "io.github.flyjingfish.fast_transform.FastDexPlugin"
+                // 插件名称
+                displayName = 'FastTransform Plugin'
+                //描述
+                description = PROJ_DESCRIPTION
+                //标签
+                tags.addAll('FastTransform', 'FlyJingFish', 'android', 'aop')
+            }
         }
     }
+}else{
+    apply from: "$rootDir/gradle/java_publish.gradle"
 }
 
-publishing {
-    publications {
-        pluginMaven(MavenPublication) {
-            // 和maven仓库artifactId保持一致
-            artifactId = PROJ_NAME
-        }
-    }
-}

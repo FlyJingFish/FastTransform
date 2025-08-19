@@ -77,3 +77,8 @@ fun printLog(text: String) {
         println(text)
     }
 }
+
+fun isWindows(): Boolean {
+    val os = System.getProperty("os.name").lowercase()
+    return os.contains("win")
+}
