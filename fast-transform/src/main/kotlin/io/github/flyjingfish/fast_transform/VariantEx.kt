@@ -7,6 +7,7 @@ import com.android.build.gradle.internal.tasks.DexArchiveBuilderTask
 import io.github.flyjingfish.fast_transform.tasks.DefaultTransformTask
 import io.github.flyjingfish.fast_transform.tasks.FastDexTask
 import io.github.flyjingfish.fast_transform.utils.RecordFrom
+import io.github.flyjingfish.fast_transform.utils.RuntimeProject
 import io.github.flyjingfish.fast_transform.utils.printLog
 import org.gradle.api.Task
 import org.gradle.api.execution.TaskExecutionGraph
@@ -15,6 +16,7 @@ import org.gradle.api.execution.TaskExecutionListener
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.TaskState
 import org.gradle.configurationcache.extensions.capitalized
+import java.io.File
 
 private val IsSetMap = mutableMapOf<String, Boolean>()
 
@@ -31,6 +33,7 @@ fun Variant.toTransformAll(
     val isSetKey = "${System.identityHashCode(project)}${thisTaskClass.name}${System.identityHashCode(taskProvider)}"
     printLog("=====>$isSetKey")
     var isNotSetFrom = false
+    val runtimeProject = RuntimeProject.get(project)
     if (fastDex && IsSetMap[isSetKey] != true) {
         var lastTask: Task? = null
         var dexTask: DexArchiveBuilderTask? = null
@@ -50,13 +53,13 @@ fun Variant.toTransformAll(
                     if (p0 == lastTask){
                         dexTask?.let { doTask ->
                             if (isForceFastDex) {
-                                val fastDexTask = FastDexTask(doTask)
+                                val fastDexTask = FastDexTask(doTask, runtimeProject)
                                 fastDexTask.taskAction()
                                 printLog("$isSetKey ===> taskAction")
                                 project.rootProject.gradle.taskGraph.removeTaskExecutionListener(this)
                             }else {
                                 if (p1.upToDate){
-                                    RecordFrom.setLastFrom(doTask)
+                                    RecordFrom.setLastFrom(doTask,runtimeProject)
                                 }
                             }
                         }
@@ -95,7 +98,7 @@ fun Variant.toTransformAll(
                         doLastTask.doLast { _ ->
                             if (thisTask == taskProvider.get()){
                                 doDexTask.let { doTask ->
-                                    val fastDexTask = FastDexTask(doTask)
+                                    val fastDexTask = FastDexTask(doTask, runtimeProject)
                                     fastDexTask.taskAction()
                                 }
                             }
@@ -172,7 +175,7 @@ fun Variant.toTransformAll(
                                 outDir.get().asFile.listFiles()
                                     ?.filter { file -> file.name != outFile.get().asFile.name }
                                     ?.let { files ->
-                                        RecordFrom.setFrom(dexTask, files)
+                                        RecordFrom.setFrom(dexTask, files,runtimeProject)
                                     }
                             }
                         }

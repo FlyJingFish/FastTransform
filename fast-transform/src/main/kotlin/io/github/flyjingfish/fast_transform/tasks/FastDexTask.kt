@@ -3,6 +3,8 @@ package io.github.flyjingfish.fast_transform.tasks
 import com.android.build.gradle.internal.tasks.DexArchiveBuilderTask
 import io.github.flyjingfish.fast_transform.beans.EntryCache
 import io.github.flyjingfish.fast_transform.utils.RecordFrom
+import io.github.flyjingfish.fast_transform.utils.RuntimeProject
+import io.github.flyjingfish.fast_transform.utils.adapterOSPath
 import io.github.flyjingfish.fast_transform.utils.getNewJarName
 import io.github.flyjingfish.fast_transform.utils.isChange
 import io.github.flyjingfish.fast_transform.utils.saveEntry
@@ -20,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
 
-class FastDexTask(private val dexTask : DexArchiveBuilderTask) {
+class FastDexTask(private val dexTask : DexArchiveBuilderTask,private val runtimeProject: RuntimeProject) {
 
 
     private val is1ClassesJar = true
@@ -35,8 +37,7 @@ class FastDexTask(private val dexTask : DexArchiveBuilderTask) {
 
         if (classFileList.size == 1){
             if (classFileList[0].isFile && classFileList[0].absolutePath.endsWith(".jar")){
-                val outDir = dexTask.project.layout.buildDirectory.file("intermediates/classes/${dexTask.name}FastDex/All/")
-                outputDir = outDir.get().asFile
+                outputDir = File(runtimeProject.buildDir.absolutePath,"intermediates/classes/${dexTask.name}FastDex/All/".adapterOSPath())
                 singleJar = classFileList[0]
                 jarEntryCaches.clear()
                 if (!outputDir.exists()){
@@ -46,7 +47,7 @@ class FastDexTask(private val dexTask : DexArchiveBuilderTask) {
             }else if (classFileList[0].isDirectory){
                 val outputDir = classFileList[0]
                 outputDir.listFiles()?.let { files ->
-                    RecordFrom.setFrom(dexTask, files)
+                    RecordFrom.setFrom(dexTask, files,runtimeProject)
                 }
                 return true
             }
@@ -65,7 +66,7 @@ class FastDexTask(private val dexTask : DexArchiveBuilderTask) {
         writeJar()
 
         outputDir.listFiles()?.filter { file -> file.name != singleJar.name}?.let { files ->
-            RecordFrom.setFrom(dexTask, files)
+            RecordFrom.setFrom(dexTask, files,runtimeProject)
         }
     }
 

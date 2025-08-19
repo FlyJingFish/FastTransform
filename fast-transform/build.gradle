@@ -14,6 +14,7 @@ dependencies {
     implementation gradleApi()
     implementation localGroovy()
     compileOnly libs.gradle
+    compileOnly libs.gson
     implementation libs.kotlinx.coroutines
 }
 
