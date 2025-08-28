@@ -7,6 +7,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 
 fun Project.fastDex(){
+    val curProject = this
     var lastCanModifyTask : Task? =null
     var dexTask : DexArchiveBuilderTask? =null
     val runtimeProject = RuntimeProject.get(this)
@@ -25,7 +26,7 @@ fun Project.fastDex(){
     }
     project.rootProject.gradle.taskGraph.addTaskExecutionGraphListener {
         for (task in it.allTasks) {
-            if (task is DexArchiveBuilderTask){
+            if (task is DexArchiveBuilderTask && task.project == curProject){
                 dexTask = task
                 break
             }

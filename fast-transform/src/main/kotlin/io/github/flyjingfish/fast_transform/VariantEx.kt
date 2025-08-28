@@ -75,11 +75,11 @@ fun Variant.toTransformAll(
             override fun graphPopulated(it: TaskExecutionGraph) {
                 var nextTask: Task? = null
                 for (task in it.allTasks) {
-                    if (task.javaClass == thisTaskClass) {
+                    if (task.javaClass == thisTaskClass && task.project == project) {
                         thisTask = task as DefaultTransformTask
                         nextTask = it.allTasks[it.allTasks.indexOf(thisTask)+1]
                     }
-                    if (task is DexArchiveBuilderTask) {
+                    if (task is DexArchiveBuilderTask && task.project == project) {
                         dexTask = task
                         break
                     }
@@ -171,7 +171,7 @@ fun Variant.toTransformAll(
                     val dexTaskName = "dexBuilder${name.capitalized()}"
                     it.project.tasks.withType(DexArchiveBuilderTask::class.java)
                         .forEach { dexTask ->
-                            if (dexTaskName == dexTask?.name) {
+                            if (dexTaskName == dexTask?.name && dexTask.project == project) {
                                 outDir.get().asFile.listFiles()
                                     ?.filter { file -> file.name != outFile.get().asFile.name }
                                     ?.let { files ->
